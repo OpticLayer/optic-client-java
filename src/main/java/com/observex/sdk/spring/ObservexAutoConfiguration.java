@@ -4,6 +4,7 @@ import com.observex.sdk.ObserveX;
 import com.observex.sdk.ObserveXConfig;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.instrumentation.micrometer.v1_5.OpenTelemetryMeterRegistry;
+import jakarta.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -11,7 +12,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 
 @AutoConfiguration
@@ -45,6 +48,18 @@ public class ObservexAutoConfiguration {
         }
 
         return registry;
+    }
+
+    @Bean
+    @ConditionalOnClass({Filter.class, FilterRegistrationBean.class})
+    @ConditionalOnMissingBean(name = "observexHttpTelemetryFilter")
+    public FilterRegistrationBean<Filter> observexHttpTelemetryFilter(ObserveX observeX) {
+        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
+        registration.setName("observexHttpTelemetryFilter");
+        registration.setFilter(new ObservexHttpTelemetryFilter(observeX));
+        registration.addUrlPatterns("/*");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
+        return registration;
     }
 
     private static ObserveXConfig buildConfig(ObservexProperties properties, Environment environment) {

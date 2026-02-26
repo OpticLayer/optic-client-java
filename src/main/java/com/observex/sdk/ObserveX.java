@@ -19,6 +19,7 @@ import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
 public final class ObserveX implements AutoCloseable {
@@ -179,8 +180,20 @@ public final class ObserveX implements AutoCloseable {
         if (notBlank(config.getServiceVersion())) {
             attrs.put(AttributeKey.stringKey("service.version"), config.getServiceVersion());
         }
+        String hostName = resolveHostName();
+        if (notBlank(hostName)) {
+            attrs.put(AttributeKey.stringKey("host.name"), hostName);
+        }
 
         return Resource.getDefault().merge(Resource.create(attrs.build()));
+    }
+
+    private static String resolveHostName() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (Exception ignored) {
+            return "";
+        }
     }
 
     private static String signalEndpoint(String endpoint, String signalPath) {
