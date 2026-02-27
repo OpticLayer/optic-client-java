@@ -1,4 +1,4 @@
-package com.observex.sdk;
+package com.optic.sdk;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.logs.Logger;
@@ -22,40 +22,40 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
-public final class ObserveX implements AutoCloseable {
+public final class Optic implements AutoCloseable {
     public static final String VERSION = "0.1.0";
 
     private static final Object LOCK = new Object();
-    private static ObserveX instance;
+    private static Optic instance;
 
-    private final ObserveXConfig config;
+    private final OpticConfig config;
     private final OpenTelemetry openTelemetry;
     private final OpenTelemetrySdk sdk;
 
     private volatile boolean closed;
 
-    private ObserveX(ObserveXConfig config, OpenTelemetry openTelemetry, OpenTelemetrySdk sdk) {
+    private Optic(OpticConfig config, OpenTelemetry openTelemetry, OpenTelemetrySdk sdk) {
         this.config = config;
         this.openTelemetry = openTelemetry;
         this.sdk = sdk;
     }
 
-    public static ObserveX init() {
-        return init(ObserveXConfig.fromEnv());
+    public static Optic init() {
+        return init(OpticConfig.fromEnv());
     }
 
-    public static ObserveX init(ObserveXConfig config) {
+    public static Optic init(OpticConfig config) {
         synchronized (LOCK) {
             if (instance != null) {
                 return instance;
             }
 
-            ObserveXConfig effective = config == null ? ObserveXConfig.fromEnv() : config;
+            OpticConfig effective = config == null ? OpticConfig.fromEnv() : config;
             effective.validate();
 
-            ObserveX created;
+            Optic created;
             if (!effective.isEnableMetrics() && !effective.isEnableTraces() && !effective.isEnableLogs()) {
-                created = new ObserveX(effective, OpenTelemetry.noop(), null);
+                created = new Optic(effective, OpenTelemetry.noop(), null);
             } else {
                 Resource resource = buildResource(effective);
                 String authValue = "Bearer " + effective.getApiKey();
@@ -102,7 +102,7 @@ public final class ObserveX implements AutoCloseable {
 
                 OpenTelemetrySdk sdk = sdkBuilder.buildAndRegisterGlobal();
 
-                created = new ObserveX(effective, sdk, sdk);
+                created = new Optic(effective, sdk, sdk);
             }
 
             instance = created;
@@ -117,7 +117,7 @@ public final class ObserveX implements AutoCloseable {
     }
 
     public static void shutdownGlobal() {
-        ObserveX current;
+        Optic current;
         synchronized (LOCK) {
             current = instance;
         }
@@ -138,7 +138,7 @@ public final class ObserveX implements AutoCloseable {
         return openTelemetry.getLogsBridge().loggerBuilder(instrumentationScope).build();
     }
 
-    public ObserveXConfig getConfig() {
+    public OpticConfig getConfig() {
         return config;
     }
 
@@ -169,11 +169,11 @@ public final class ObserveX implements AutoCloseable {
         shutdown();
     }
 
-    private static Resource buildResource(ObserveXConfig config) {
+    private static Resource buildResource(OpticConfig config) {
         AttributesBuilder attrs = Attributes.builder()
                 .put(AttributeKey.stringKey("service.name"), config.getServiceName())
                 .put(AttributeKey.stringKey("deployment.environment"), config.getEnvironment())
-                .put(AttributeKey.stringKey("telemetry.sdk.name"), "observex-sdk")
+                .put(AttributeKey.stringKey("telemetry.sdk.name"), "optic-sdk")
                 .put(AttributeKey.stringKey("telemetry.sdk.language"), "java")
                 .put(AttributeKey.stringKey("telemetry.sdk.version"), VERSION);
 

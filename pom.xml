@@ -3,13 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.observex</groupId>
-  <artifactId>observex-sdk-java</artifactId>
+  <groupId>com.optic</groupId>
+  <artifactId>optic-sdk-java</artifactId>
   <version>0.1.0</version>
   <packaging>jar</packaging>
 
-  <name>ObserveX Java SDK</name>
-  <description>ObserveX Java/Spring Boot SDK for OTLP metrics export</description>
+  <name>Optic Java SDK</name>
+  <description>Optic Java/Spring Boot SDK for OTLP metrics export</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

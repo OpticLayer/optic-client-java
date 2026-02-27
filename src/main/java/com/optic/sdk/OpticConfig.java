@@ -1,10 +1,10 @@
-package com.observex.sdk;
+package com.optic.sdk;
 
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 
-public final class ObserveXConfig {
+public final class OpticConfig {
     private String apiKey = "";
     private String serviceName = "";
     private String endpoint = "http://localhost:8080";
@@ -15,21 +15,21 @@ public final class ObserveXConfig {
     private boolean enableLogs = true;
     private Duration exportInterval = Duration.ofSeconds(10);
 
-    public static ObserveXConfig fromEnv() {
-        ObserveXConfig cfg = new ObserveXConfig();
+    public static OpticConfig fromEnv() {
+        OpticConfig cfg = new OpticConfig();
         Map<String, String> env = System.getenv();
 
-        cfg.apiKey = firstNonBlank(env.get("OBSERVEX_API_KEY"), env.get("OTEL_API_KEY"));
-        cfg.serviceName = firstNonBlank(env.get("OBSERVEX_SERVICE_NAME"), env.get("OTEL_SERVICE_NAME"));
-        cfg.endpoint = firstNonBlank(env.get("OBSERVEX_ENDPOINT"), env.get("OTEL_EXPORTER_OTLP_ENDPOINT"), cfg.endpoint);
-        cfg.environment = firstNonBlank(env.get("OBSERVEX_ENVIRONMENT"), cfg.environment);
-        cfg.serviceVersion = firstNonBlank(env.get("OBSERVEX_SERVICE_VERSION"));
+        cfg.apiKey = firstNonBlank(env.get("OPTIC_API_KEY"), env.get("OTEL_API_KEY"));
+        cfg.serviceName = firstNonBlank(env.get("OPTIC_SERVICE_NAME"), env.get("OTEL_SERVICE_NAME"));
+        cfg.endpoint = firstNonBlank(env.get("OPTIC_ENDPOINT"), env.get("OTEL_EXPORTER_OTLP_ENDPOINT"), cfg.endpoint);
+        cfg.environment = firstNonBlank(env.get("OPTIC_ENVIRONMENT"), cfg.environment);
+        cfg.serviceVersion = firstNonBlank(env.get("OPTIC_SERVICE_VERSION"));
 
-        cfg.enableTraces = parseBoolean(env.get("OBSERVEX_ENABLE_TRACES"), cfg.enableTraces);
-        cfg.enableMetrics = parseBoolean(env.get("OBSERVEX_ENABLE_METRICS"), cfg.enableMetrics);
-        cfg.enableLogs = parseBoolean(env.get("OBSERVEX_ENABLE_LOGS"), cfg.enableLogs);
+        cfg.enableTraces = parseBoolean(env.get("OPTIC_ENABLE_TRACES"), cfg.enableTraces);
+        cfg.enableMetrics = parseBoolean(env.get("OPTIC_ENABLE_METRICS"), cfg.enableMetrics);
+        cfg.enableLogs = parseBoolean(env.get("OPTIC_ENABLE_LOGS"), cfg.enableLogs);
 
-        long intervalMs = parseLong(env.get("OBSERVEX_EXPORT_INTERVAL_MS"), -1L);
+        long intervalMs = parseLong(env.get("OPTIC_EXPORT_INTERVAL_MS"), -1L);
         if (intervalMs <= 0) {
             intervalMs = parseLong(env.get("OTEL_METRIC_EXPORT_INTERVAL"), -1L);
         }
@@ -45,10 +45,10 @@ public final class ObserveXConfig {
             return;
         }
         if (isBlank(apiKey)) {
-            throw new IllegalArgumentException("ObserveX API key is required. Set OBSERVEX_API_KEY or OTEL_API_KEY");
+            throw new IllegalArgumentException("Optic API key is required. Set OPTIC_API_KEY or OTEL_API_KEY");
         }
         if (isBlank(serviceName)) {
-            throw new IllegalArgumentException("service name is required. Set OBSERVEX_SERVICE_NAME or OTEL_SERVICE_NAME");
+            throw new IllegalArgumentException("service name is required. Set OPTIC_SERVICE_NAME or OTEL_SERVICE_NAME");
         }
         if (isBlank(endpoint)) {
             throw new IllegalArgumentException("endpoint must not be empty");
@@ -62,7 +62,7 @@ public final class ObserveXConfig {
         return apiKey;
     }
 
-    public ObserveXConfig setApiKey(String apiKey) {
+    public OpticConfig setApiKey(String apiKey) {
         this.apiKey = nullToEmpty(apiKey).trim();
         return this;
     }
@@ -71,7 +71,7 @@ public final class ObserveXConfig {
         return serviceName;
     }
 
-    public ObserveXConfig setServiceName(String serviceName) {
+    public OpticConfig setServiceName(String serviceName) {
         this.serviceName = nullToEmpty(serviceName).trim();
         return this;
     }
@@ -80,7 +80,7 @@ public final class ObserveXConfig {
         return endpoint;
     }
 
-    public ObserveXConfig setEndpoint(String endpoint) {
+    public OpticConfig setEndpoint(String endpoint) {
         String normalized = nullToEmpty(endpoint).trim();
         if (!normalized.isEmpty()) {
             this.endpoint = normalized;
@@ -92,7 +92,7 @@ public final class ObserveXConfig {
         return environment;
     }
 
-    public ObserveXConfig setEnvironment(String environment) {
+    public OpticConfig setEnvironment(String environment) {
         String normalized = nullToEmpty(environment).trim();
         if (!normalized.isEmpty()) {
             this.environment = normalized;
@@ -104,7 +104,7 @@ public final class ObserveXConfig {
         return serviceVersion;
     }
 
-    public ObserveXConfig setServiceVersion(String serviceVersion) {
+    public OpticConfig setServiceVersion(String serviceVersion) {
         this.serviceVersion = nullToEmpty(serviceVersion).trim();
         return this;
     }
@@ -113,7 +113,7 @@ public final class ObserveXConfig {
         return enableMetrics;
     }
 
-    public ObserveXConfig setEnableMetrics(boolean enableMetrics) {
+    public OpticConfig setEnableMetrics(boolean enableMetrics) {
         this.enableMetrics = enableMetrics;
         return this;
     }
@@ -122,7 +122,7 @@ public final class ObserveXConfig {
         return enableTraces;
     }
 
-    public ObserveXConfig setEnableTraces(boolean enableTraces) {
+    public OpticConfig setEnableTraces(boolean enableTraces) {
         this.enableTraces = enableTraces;
         return this;
     }
@@ -131,7 +131,7 @@ public final class ObserveXConfig {
         return enableLogs;
     }
 
-    public ObserveXConfig setEnableLogs(boolean enableLogs) {
+    public OpticConfig setEnableLogs(boolean enableLogs) {
         this.enableLogs = enableLogs;
         return this;
     }
@@ -140,7 +140,7 @@ public final class ObserveXConfig {
         return exportInterval;
     }
 
-    public ObserveXConfig setExportInterval(Duration exportInterval) {
+    public OpticConfig setExportInterval(Duration exportInterval) {
         if (exportInterval != null && !exportInterval.isZero() && !exportInterval.isNegative()) {
             this.exportInterval = exportInterval;
         }

@@ -1,10 +1,10 @@
-package com.observex.sdk.spring;
+package com.optic.sdk.spring;
 
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "observex")
-public class ObservexProperties {
+@ConfigurationProperties(prefix = "optic")
+public class OpticProperties {
     private boolean enabled = true;
     private String apiKey;
     private String serviceName;

@@ -1,7 +1,7 @@
-package com.observex.sdk.spring;
+package com.optic.sdk.spring;
 
-import com.observex.sdk.ObserveX;
-import com.observex.sdk.ObserveXConfig;
+import com.optic.sdk.Optic;
+import com.optic.sdk.OpticConfig;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.instrumentation.micrometer.v1_5.OpenTelemetryMeterRegistry;
 import jakarta.servlet.Filter;
@@ -18,27 +18,27 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 
 @AutoConfiguration
-@ConditionalOnClass(ObserveX.class)
-@EnableConfigurationProperties(ObservexProperties.class)
-@ConditionalOnProperty(prefix = "observex", name = "enabled", havingValue = "true", matchIfMissing = true)
-public class ObservexAutoConfiguration {
+@ConditionalOnClass(Optic.class)
+@EnableConfigurationProperties(OpticProperties.class)
+@ConditionalOnProperty(prefix = "optic", name = "enabled", havingValue = "true", matchIfMissing = true)
+public class OpticAutoConfiguration {
 
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean
-    public ObserveX observexSdk(ObservexProperties properties, Environment environment) {
-        ObserveXConfig config = buildConfig(properties, environment);
-        return ObserveX.init(config);
+    public Optic opticSdk(OpticProperties properties, Environment environment) {
+        OpticConfig config = buildConfig(properties, environment);
+        return Optic.init(config);
     }
 
     @Bean
     @ConditionalOnClass({MeterRegistry.class, OpenTelemetryMeterRegistry.class})
-    @ConditionalOnProperty(prefix = "observex", name = "enable-metrics", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean(name = "observexOpenTelemetryMeterRegistry")
-    public MeterRegistry observexOpenTelemetryMeterRegistry(ObserveX observeX) {
-        MeterRegistry registry = OpenTelemetryMeterRegistry.builder(observeX.getOpenTelemetry()).build();
+    @ConditionalOnProperty(prefix = "optic", name = "enable-metrics", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnMissingBean(name = "opticOpenTelemetryMeterRegistry")
+    public MeterRegistry opticOpenTelemetryMeterRegistry(Optic optic) {
+        MeterRegistry registry = OpenTelemetryMeterRegistry.builder(optic.getOpenTelemetry()).build();
 
         List<String> commonTags = new ArrayList<>();
-        ObserveXConfig cfg = observeX.getConfig();
+        OpticConfig cfg = optic.getConfig();
         addTag(commonTags, "service.name", cfg.getServiceName());
         addTag(commonTags, "deployment.environment", cfg.getEnvironment());
         addTag(commonTags, "service.version", cfg.getServiceVersion());
@@ -52,18 +52,18 @@ public class ObservexAutoConfiguration {
 
     @Bean
     @ConditionalOnClass({Filter.class, FilterRegistrationBean.class})
-    @ConditionalOnMissingBean(name = "observexHttpTelemetryFilter")
-    public FilterRegistrationBean<Filter> observexHttpTelemetryFilter(ObserveX observeX) {
+    @ConditionalOnMissingBean(name = "opticHttpTelemetryFilter")
+    public FilterRegistrationBean<Filter> opticHttpTelemetryFilter(Optic optic) {
         FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
-        registration.setName("observexHttpTelemetryFilter");
-        registration.setFilter(new ObservexHttpTelemetryFilter(observeX));
+        registration.setName("opticHttpTelemetryFilter");
+        registration.setFilter(new OpticHttpTelemetryFilter(optic));
         registration.addUrlPatterns("/*");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
         return registration;
     }
 
-    private static ObserveXConfig buildConfig(ObservexProperties properties, Environment environment) {
-        ObserveXConfig config = ObserveXConfig.fromEnv();
+    private static OpticConfig buildConfig(OpticProperties properties, Environment environment) {
+        OpticConfig config = OpticConfig.fromEnv();
 
         if (hasText(properties.getApiKey())) {
             config.setApiKey(properties.getApiKey());

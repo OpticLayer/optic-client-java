@@ -1,6 +1,6 @@
-package com.observex.sdk.spring;
+package com.optic.sdk.spring;
 
-import com.observex.sdk.ObserveX;
+import com.optic.sdk.Optic;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.logs.LogRecordBuilder;
@@ -22,7 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-final class ObservexHttpTelemetryFilter implements Filter {
+final class OpticHttpTelemetryFilter implements Filter {
     private final Tracer tracer;
     private final Logger logger;
     private final LongCounter requestCounter;
@@ -31,25 +31,25 @@ final class ObservexHttpTelemetryFilter implements Filter {
     private final boolean logsEnabled;
     private final boolean metricsEnabled;
 
-    ObservexHttpTelemetryFilter(ObserveX observeX) {
-        this.tracer = observeX.tracer("observex-http");
-        this.logger = observeX.logger("observex-http");
-        this.requestCounter = observeX
-                .meter("observex-http")
+    OpticHttpTelemetryFilter(Optic optic) {
+        this.tracer = optic.tracer("optic-http");
+        this.logger = optic.logger("optic-http");
+        this.requestCounter = optic
+                .meter("optic-http")
                 .counterBuilder("http.server.request.count")
                 .setDescription("Total inbound HTTP requests")
                 .setUnit("1")
                 .build();
-        this.requestDurationMs = observeX
-                .meter("observex-http")
+        this.requestDurationMs = optic
+                .meter("optic-http")
                 .histogramBuilder("http.server.request.duration")
                 .setDescription("Inbound HTTP request duration")
                 .setUnit("ms")
                 .build();
 
-        this.tracesEnabled = observeX.getConfig().isEnableTraces();
-        this.logsEnabled = observeX.getConfig().isEnableLogs();
-        this.metricsEnabled = observeX.getConfig().isEnableMetrics();
+        this.tracesEnabled = optic.getConfig().isEnableTraces();
+        this.logsEnabled = optic.getConfig().isEnableLogs();
+        this.metricsEnabled = optic.getConfig().isEnableMetrics();
     }
 
     @Override
